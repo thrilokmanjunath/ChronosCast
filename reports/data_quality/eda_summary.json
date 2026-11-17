@@ -1,0 +1,10 @@
+{
+  "total_sales": 47704512.0,
+  "mean_total_daily_sales": 26125.14,
+  "store_count": 10,
+  "item_count": 50,
+  "start_date": "2013-01-01",
+  "end_date": "2017-12-31",
+  "total_days": 1826,
+  "total_observations": 913000
+}

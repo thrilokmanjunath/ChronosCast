@@ -1,0 +1,55 @@
+{
+  "total_rows": 913000,
+  "columns": [
+    "date",
+    "store",
+    "item",
+    "sales"
+  ],
+  "dtypes": {
+    "date": "datetime64[us]",
+    "store": "int64",
+    "item": "int64",
+    "sales": "int64"
+  },
+  "checks": {
+    "no_missing_values": true,
+    "no_duplicate_keys": true,
+    "date_range_valid": true,
+    "all_calendar_days_present": true,
+    "store_identifiers_valid": true,
+    "item_identifiers_valid": true,
+    "full_temporal_grid_intact": true,
+    "non_negative_sales": true,
+    "no_nan_sales": true
+  },
+  "passed": true,
+  "null_counts": {
+    "date": 0,
+    "store": 0,
+    "item": 0,
+    "sales": 0
+  },
+  "duplicate_keys": 0,
+  "date_range": {
+    "min_date": "2013-01-01",
+    "max_date": "2017-12-31",
+    "unique_days": 1826,
+    "expected_days": 1826
+  },
+  "entity_counts": {
+    "unique_stores": 10,
+    "unique_items": 50,
+    "total_series": 500
+  },
+  "expected_total_rows": 913000,
+  "sales_distribution": {
+    "min": 0.0,
+    "max": 231.0,
+    "mean": 52.25,
+    "std": 28.8,
+    "median": 47.0,
+    "negative_count": 0,
+    "nan_count": 0
+  }
+}
