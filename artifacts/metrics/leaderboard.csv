@@ -1,0 +1,8 @@
+model,model_type,horizon,runtime_sec,mae,rmse,mape,smape,wape,rank
+LightGBM Regressor (Primary),Machine Learning,28,6.543,5.9182,7.6941,12.92,12.32,10.53,1
+XGBoost Regressor,Machine Learning,28,0.361,6.0178,7.8291,13.09,12.48,10.71,2
+Random Forest Regressor,Machine Learning,28,2.613,6.2536,8.1763,13.39,12.88,11.13,3
+Holt-Winters (Sample Series),Statistical,28,0.824,5.6228,7.306,20.06,18.17,17.32,4
+Moving Average (w=7),Baseline,28,0.09,6.9543,9.0237,21.48,18.9,17.41,5
+Seasonal Naive (s=7),Baseline,28,0.081,7.28,9.4009,22.31,20.19,18.23,6
+Naive (Persistence),Baseline,28,0.086,10.6144,13.7986,32.39,26.28,26.58,7

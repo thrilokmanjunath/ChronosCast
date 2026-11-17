@@ -1,0 +1,86 @@
+[
+  {
+    "model": "LightGBM Regressor (Primary)",
+    "model_type": "Machine Learning",
+    "horizon": 28,
+    "runtime_sec": 6.543,
+    "mae": 5.9182,
+    "rmse": 7.6941,
+    "mape": 12.92,
+    "smape": 12.32,
+    "wape": 10.53,
+    "rank": 1
+  },
+  {
+    "model": "XGBoost Regressor",
+    "model_type": "Machine Learning",
+    "horizon": 28,
+    "runtime_sec": 0.361,
+    "mae": 6.0178,
+    "rmse": 7.8291,
+    "mape": 13.09,
+    "smape": 12.48,
+    "wape": 10.71,
+    "rank": 2
+  },
+  {
+    "model": "Random Forest Regressor",
+    "model_type": "Machine Learning",
+    "horizon": 28,
+    "runtime_sec": 2.613,
+    "mae": 6.2536,
+    "rmse": 8.1763,
+    "mape": 13.39,
+    "smape": 12.88,
+    "wape": 11.13,
+    "rank": 3
+  },
+  {
+    "model": "Holt-Winters (Sample Series)",
+    "model_type": "Statistical",
+    "horizon": 28,
+    "runtime_sec": 0.824,
+    "mae": 5.6228,
+    "rmse": 7.306,
+    "mape": 20.06,
+    "smape": 18.17,
+    "wape": 17.32,
+    "rank": 4
+  },
+  {
+    "model": "Moving Average (w=7)",
+    "model_type": "Baseline",
+    "horizon": 28,
+    "runtime_sec": 0.09,
+    "mae": 6.9543,
+    "rmse": 9.0237,
+    "mape": 21.48,
+    "smape": 18.9,
+    "wape": 17.41,
+    "rank": 5
+  },
+  {
+    "model": "Seasonal Naive (s=7)",
+    "model_type": "Baseline",
+    "horizon": 28,
+    "runtime_sec": 0.081,
+    "mae": 7.28,
+    "rmse": 9.4009,
+    "mape": 22.31,
+    "smape": 20.19,
+    "wape": 18.23,
+    "rank": 6
+  },
+  {
+    "model": "Naive (Persistence)",
+    "model_type": "Baseline",
+    "horizon": 28,
+    "runtime_sec": 0.086,
+    "mae": 10.6144,
+    "rmse": 13.7986,
+    "mape": 32.39,
+    "smape": 26.28,
+    "wape": 26.58,
+    "rank": 7
+  }
+]

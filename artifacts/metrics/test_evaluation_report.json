@@ -1,0 +1,32 @@
+{
+  "best_model": "LightGBM Regressor (Primary)",
+  "test_period": "2017-07-01 to 2017-12-31",
+  "test_observations": 92000,
+  "overall_metrics": {
+    "mae": 6.2391,
+    "rmse": 8.0964,
+    "mape": 12.22,
+    "smape": 11.75,
+    "wape": 10.16
+  },
+  "uncertainty_coverage": {
+    "80%": {
+      "nominal_confidence_pct": 80.0,
+      "empirical_coverage_pct": 77.68,
+      "mean_interval_width": 18.8,
+      "margin_of_error": 9.4
+    },
+    "90%": {
+      "nominal_confidence_pct": 90.0,
+      "empirical_coverage_pct": 88.31,
+      "mean_interval_width": 25.12,
+      "margin_of_error": 12.56
+    },
+    "95%": {
+      "nominal_confidence_pct": 95.0,
+      "empirical_coverage_pct": 94.08,
+      "mean_interval_width": 31.13,
+      "margin_of_error": 15.58
+    }
+  }
+}
