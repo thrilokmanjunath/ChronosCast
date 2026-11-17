@@ -66,8 +66,17 @@ lead_time_demand = lead_time_days * daily_mean_demand
 
 # Z-score for service level
 z_score = norm.ppf(service_level)
-# Safety Stock: SS = Z * sigma * sqrt(L)
-safety_stock = z_score * daily_demand_std * math.sqrt(lead_time_days)
+# Autocorrelation adjustment factor for lead-time demand variance
+# Accounts for serial correlation: Var(sum D_t) = L*sigma^2 + 2*sigma^2*sum((L-k)*rho^k)
+rho_1 = 0.65  # Empirical lag-1 autocorrelation in retail daily sales
+if lead_time_days > 1:
+    var_factor = lead_time_days + 2.0 * sum((lead_time_days - k) * (rho_1 ** k) for k in range(1, lead_time_days))
+else:
+    var_factor = 1.0
+sigma_lead_time = daily_demand_std * math.sqrt(max(1.0, var_factor))
+
+# Safety Stock: SS = Z * sigma_L
+safety_stock = z_score * sigma_lead_time
 # Reorder Point: ROP = mu_L + SS
 reorder_point = lead_time_demand + safety_stock
 

@@ -2,6 +2,7 @@
   {
     "model": "LightGBM Regressor (Primary)",
     "model_type": "Machine Learning",
+    "evaluation_strategy": "Rolling 1-Step Validation",
     "horizon": 28,
     "runtime_sec": 6.543,
     "mae": 5.9182,
@@ -14,6 +15,7 @@
   {
     "model": "XGBoost Regressor",
     "model_type": "Machine Learning",
+    "evaluation_strategy": "Rolling 1-Step Validation",
     "horizon": 28,
     "runtime_sec": 0.361,
     "mae": 6.0178,
@@ -26,6 +28,7 @@
   {
     "model": "Random Forest Regressor",
     "model_type": "Machine Learning",
+    "evaluation_strategy": "Rolling 1-Step Validation",
     "horizon": 28,
     "runtime_sec": 2.613,
     "mae": 6.2536,
@@ -38,6 +41,7 @@
   {
     "model": "Holt-Winters (Sample Series)",
     "model_type": "Statistical",
+    "evaluation_strategy": "Multi-Step 28-Day (6 Sample Series)",
     "horizon": 28,
     "runtime_sec": 0.824,
     "mae": 5.6228,
@@ -50,6 +54,7 @@
   {
     "model": "Moving Average (w=7)",
     "model_type": "Baseline",
+    "evaluation_strategy": "Multi-Step 28-Day Forecast",
     "horizon": 28,
     "runtime_sec": 0.09,
     "mae": 6.9543,
@@ -62,6 +67,7 @@
   {
     "model": "Seasonal Naive (s=7)",
     "model_type": "Baseline",
+    "evaluation_strategy": "Multi-Step 28-Day Forecast",
     "horizon": 28,
     "runtime_sec": 0.081,
     "mae": 7.28,
@@ -74,6 +80,7 @@
   {
     "model": "Naive (Persistence)",
     "model_type": "Baseline",
+    "evaluation_strategy": "Multi-Step 28-Day Forecast",
     "horizon": 28,
     "runtime_sec": 0.086,
     "mae": 10.6144,

@@ -48,6 +48,17 @@ def test_forecasting_engine_network_total():
     assert res["forecast_total"] > 50000
 
 
+def test_forecasting_engine_recursive_progression():
+    engine = ForecastingEngine()
+    res = engine.generate_forecast(store=1, item=1, horizon=14, confidence_level=0.90)
+    preds = res["predictions"]
+    # Verify non-trivial non-flat progression across days
+    assert len(set(preds)) > 5
+    # Verify bounds
+    for p, l, u in zip(preds, res["lower_bounds"], res["upper_bounds"], strict=False):
+        assert l <= p <= u
+
+
 def test_app_pages_syntax_and_importability():
     # Verify Streamlit page scripts can be compiled and parsed without syntax errors
     pages = [

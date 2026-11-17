@@ -84,14 +84,29 @@ class ForecastingEngine:
         stores = [store] if store is not None else sorted(df_feat["store"].unique())
         items = [item] if item is not None else sorted(df_feat["item"].unique())
 
-        # Build inference rows using the last known history for feature alignment
-        inference_rows = []
+        # Pre-extract entity histories and initial time index for recursive rollout
+        entity_histories: Dict[tuple, list] = {}
+        entity_time_idx: Dict[tuple, int] = {}
+
         for s in stores:
             for i in items:
-                hist = df_feat[(df_feat["store"] == s) & (df_feat["item"] == i)].sort_values("date").iloc[-1]
-                for step, d in enumerate(future_dates, 1):
-                    # Align future calendar features
-                    dow = d.day_of_week
+                series_data = df_feat[(df_feat["store"] == s) & (df_feat["item"] == i)].sort_values("date")
+                entity_histories[(s, i)] = list(series_data["sales"].values)
+                entity_time_idx[(s, i)] = int(series_data["time_index"].iloc[-1])
+
+        active_model = self.model.name if self.model is not None else "rolling_mean_baseline"
+        all_forecast_records = []
+
+        # Vectorized step-by-step recursive rollout across forecast horizon
+        for step, d in enumerate(future_dates, 1):
+            dow = d.day_of_week
+            step_rows = []
+            entity_keys = []
+
+            for s in stores:
+                for i in items:
+                    hist = entity_histories[(s, i)]
+                    t_idx = entity_time_idx[(s, i)] + step
                     row = {
                         "date": d,
                         "store": int(s),
@@ -107,64 +122,65 @@ class ForecastingEngine:
                         "day_of_week_cos": float(np.cos(2 * np.pi * dow / 7.0)),
                         "month_sin": float(np.sin(2 * np.pi * (d.month - 1) / 12.0)),
                         "month_cos": float(np.cos(2 * np.pi * (d.month - 1) / 12.0)),
-                        "time_index": int(hist["time_index"] + step),
-                        "sales_lag_1": float(hist["sales_lag_1"]),
-                        "sales_lag_7": float(hist["sales_lag_7"]),
-                        "sales_lag_14": float(hist["sales_lag_14"]),
-                        "sales_lag_28": float(hist["sales_lag_28"]),
-                        "sales_lag_56": float(hist["sales_lag_56"]),
-                        "sales_lag_365": float(hist["sales_lag_365"]),
-                        "rolling_mean_7": float(hist["rolling_mean_7"]),
-                        "rolling_mean_14": float(hist["rolling_mean_14"]),
-                        "rolling_mean_28": float(hist["rolling_mean_28"]),
-                        "rolling_mean_56": float(hist["rolling_mean_56"]),
-                        "rolling_std_7": float(hist["rolling_std_7"]),
-                        "rolling_std_14": float(hist["rolling_std_14"]),
-                        "rolling_std_28": float(hist["rolling_std_28"]),
+                        "time_index": t_idx,
+                        "sales_lag_1": float(hist[-1]),
+                        "sales_lag_7": float(hist[-7] if len(hist) >= 7 else hist[-1]),
+                        "sales_lag_14": float(hist[-14] if len(hist) >= 14 else hist[-1]),
+                        "sales_lag_28": float(hist[-28] if len(hist) >= 28 else hist[-1]),
+                        "sales_lag_56": float(hist[-56] if len(hist) >= 56 else hist[-1]),
+                        "sales_lag_365": float(hist[-365] if len(hist) >= 365 else hist[-1]),
+                        "rolling_mean_7": float(np.mean(hist[-7:])),
+                        "rolling_mean_14": float(np.mean(hist[-14:])),
+                        "rolling_mean_28": float(np.mean(hist[-28:])),
+                        "rolling_mean_56": float(np.mean(hist[-56:])),
+                        "rolling_std_7": float(np.std(hist[-7:])) if len(hist) >= 7 else 0.0,
+                        "rolling_std_14": float(np.std(hist[-14:])) if len(hist) >= 14 else 0.0,
+                        "rolling_std_28": float(np.std(hist[-28:])) if len(hist) >= 28 else 0.0,
                     }
-                    inference_rows.append(row)
+                    step_rows.append(row)
+                    entity_keys.append((s, i))
 
-        inf_df = pd.DataFrame(inference_rows)
-        # Ensure exact dtypes match trained feature matrix
-        inf_df["store"] = inf_df["store"].astype("int32")
-        inf_df["item"] = inf_df["item"].astype("int32")
-        inf_df["day"] = inf_df["day"].astype("int32")
-        inf_df["day_of_week"] = inf_df["day_of_week"].astype("int32")
-        inf_df["week"] = inf_df["week"].astype("int32")
-        inf_df["month"] = inf_df["month"].astype("int32")
-        inf_df["quarter"] = inf_df["quarter"].astype("int32")
-        inf_df["year"] = inf_df["year"].astype("int32")
-        inf_df["is_weekend"] = inf_df["is_weekend"].astype("int32")
-        inf_df["time_index"] = inf_df["time_index"].astype("int32")
+            df_step = pd.DataFrame(step_rows)
+            # Ensure exact dtypes match trained feature matrix
+            int_cols = ["store", "item", "day", "day_of_week", "week", "month", "quarter", "year", "is_weekend", "time_index"]
+            for col in int_cols:
+                df_step[col] = df_step[col].astype("int32")
 
-        for fcol in ["day_of_week_sin", "day_of_week_cos", "month_sin", "month_cos",
-                     "sales_lag_1", "sales_lag_7", "sales_lag_14", "sales_lag_28",
-                     "sales_lag_56", "sales_lag_365", "rolling_mean_7", "rolling_mean_14",
-                     "rolling_mean_28", "rolling_mean_56", "rolling_std_7", "rolling_std_14", "rolling_std_28"]:
-            inf_df[fcol] = inf_df[fcol].astype("float32")
+            float_cols = [
+                "day_of_week_sin", "day_of_week_cos", "month_sin", "month_cos",
+                "sales_lag_1", "sales_lag_7", "sales_lag_14", "sales_lag_28",
+                "sales_lag_56", "sales_lag_365", "rolling_mean_7", "rolling_mean_14",
+                "rolling_mean_28", "rolling_mean_56", "rolling_std_7", "rolling_std_14", "rolling_std_28"
+            ]
+            for col in float_cols:
+                df_step[col] = df_step[col].astype("float32")
 
-        # Generate model point predictions
-        if self.model is not None and hasattr(self.model, "predict_features"):
-            feature_cols = self.model.feature_names_
-            raw_preds = self.model.predict_features(inf_df[feature_cols])
-            inf_df["predicted_sales"] = raw_preds
-            active_model = self.model.name
-        else:
-            # Fallback to last-known rolling mean
-            inf_df["predicted_sales"] = inf_df["rolling_mean_7"]
-            active_model = "rolling_mean_baseline"
+            if self.model is not None and hasattr(self.model, "predict_features"):
+                preds_step = self.model.predict_features(df_step[self.model.feature_names_])
+            else:
+                preds_step = df_step["rolling_mean_7"].values
 
-        # Conformal prediction intervals
-        if self.calibrator is not None:
-            lower, upper = self.calibrator.predict_intervals(
-                inf_df["predicted_sales"].values,
-                confidence_level=confidence_level,
-            )
-            inf_df["lower_bound"] = lower
-            inf_df["upper_bound"] = upper
-        else:
-            inf_df["lower_bound"] = np.maximum(0.0, inf_df["predicted_sales"] * 0.85)
-            inf_df["upper_bound"] = inf_df["predicted_sales"] * 1.15
+            df_step["predicted_sales"] = preds_step
+
+            # Conformal interval estimation per step
+            if self.calibrator is not None:
+                lower_step, upper_step = self.calibrator.predict_intervals(
+                    preds_step, confidence_level=confidence_level
+                )
+            else:
+                lower_step = np.maximum(0.0, preds_step * 0.85)
+                upper_step = preds_step * 1.15
+
+            df_step["lower_bound"] = lower_step
+            df_step["upper_bound"] = upper_step
+
+            # Append predictions back to entity histories for recursive multi-step forecasting
+            for key, p_val in zip(entity_keys, preds_step, strict=False):
+                entity_histories[key].append(float(p_val))
+
+            all_forecast_records.append(df_step)
+
+        inf_df = pd.concat(all_forecast_records, ignore_index=True)
 
         # Aggregate according to request granularity
         if store is not None and item is not None:

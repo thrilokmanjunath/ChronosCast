@@ -7,7 +7,7 @@ from pathlib import Path
 import numpy as np
 import pandas as pd
 
-from chronoscast.evaluation.backtesting import ChronologicalSplitter
+from chronoscast.evaluation.backtesting import ChronologicalSplitter, RollingOriginBacktester
 from chronoscast.evaluation.metrics import (
     mean_absolute_error,
     mean_absolute_percentage_error,
@@ -16,6 +16,7 @@ from chronoscast.evaluation.metrics import (
     weighted_absolute_percentage_error,
 )
 from chronoscast.forecasting.uncertainty import ConformalIntervalEstimator
+from chronoscast.models.baselines import MovingAverageForecaster
 
 
 def test_metric_calculations():
@@ -89,3 +90,29 @@ def test_conformal_calibrator(tmp_path: Path):
     calibrator.save(cal_file)
     loaded = ConformalIntervalEstimator.load(cal_file)
     assert loaded.quantiles == calibrator.quantiles
+
+
+def test_rolling_origin_backtester():
+    dates = pd.date_range("2016-01-01", periods=60, freq="D")
+    df = pd.DataFrame({
+        "date": dates,
+        "store": 1,
+        "item": 1,
+        "sales": np.linspace(20, 40, 60),
+    })
+    backtester = RollingOriginBacktester(
+        origins=["2016-02-01", "2016-02-15"],
+        horizons=[7, 14],
+    )
+    res = backtester.evaluate_model(
+        model_factory=lambda: MovingAverageForecaster(window=7),
+        df=df,
+        model_name="Moving Average",
+    )
+    assert "detailed_windows" in res
+    assert "horizon_summary" in res
+    assert len(res["detailed_windows"]) == 4  # 2 origins x 2 horizons
+    assert len(res["horizon_summary"]) == 2   # 2 horizons
+    for window in res["detailed_windows"]:
+        assert window["mae"] >= 0
+        assert window["wape"] >= 0
