@@ -1,0 +1,77 @@
+project:
+  name: "ChronosCast"
+  version: "0.1.0"
+  description: "Intelligent Time Series Trend Analysis and Forecasting Platform"
+
+data:
+  raw_path: "data/raw/train.csv"
+  interim_path: "data/interim/cleaned_sales.parquet"
+  processed_path: "data/processed/features_sales.parquet"
+  date_col: "date"
+  store_col: "store"
+  item_col: "item"
+  target_col: "sales"
+  expected_stores: 10
+  expected_items: 50
+  total_series: 500
+  historical_start: "2013-01-01"
+  historical_end: "2017-12-31"
+
+split:
+  train_start: "2013-01-01"
+  train_end: "2016-12-31"
+  val_start: "2017-01-01"
+  val_end: "2017-06-30"
+  test_start: "2017-07-01"
+  test_end: "2017-12-31"
+
+features:
+  lags: [1, 7, 14, 28, 56, 365]
+  rolling_mean_windows: [7, 14, 28, 56]
+  rolling_std_windows: [7, 14, 28]
+  calendar_features:
+    - "day"
+    - "day_of_week"
+    - "week"
+    - "month"
+    - "quarter"
+    - "year"
+    - "is_weekend"
+
+models:
+  horizons: [7, 14, 28]
+  primary_model: "lightgbm"
+  sample_series_for_statistical: 5  # representative series for expensive statistical fit
+  random_state: 42
+  lightgbm_params:
+    objective: "regression"
+    metric: "rmse"
+    boosting_type: "gbdt"
+    n_estimators: 300
+    learning_rate: 0.05
+    num_leaves: 63
+    subsample: 0.8
+    colsample_bytree: 0.8
+    random_state: 42
+    n_jobs: -1
+    verbose: -1
+
+uncertainty:
+  method: "conformal_residual_quantile"
+  confidence_level: 0.90
+  calibration_window_days: 90
+
+inventory:
+  default_lead_time_days: 7
+  default_service_level: 0.95
+  default_holding_cost_rate: 0.20
+  default_order_cost: 50.0
+
+api:
+  host: "0.0.0.0"
+  port: 8000
+  reload: false
+
+mlflow:
+  tracking_uri: "sqlite:///mlruns.db"
+  experiment_name: "chronoscast_forecasting"

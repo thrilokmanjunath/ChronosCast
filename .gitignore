@@ -1,0 +1,103 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+
+# C extensions
+*.so
+
+# Distribution / packaging
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+share/python-wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+
+# Virtual Environments
+.env
+.venv
+env/
+venv/
+ENV/
+env.bak/
+venv.bak/
+
+# Environment Variables
+.env
+.env.local
+.env.*.local
+
+# Large datasets and raw downloads
+data/raw/*.csv
+data/raw/*.zip
+data/raw/*.tar.gz
+data/interim/*.parquet
+data/processed/*.parquet
+!data/**/.gitkeep
+
+# Large interactive HTML exports (reproducible via scripts)
+reports/figures/*.html
+
+# MLflow and tracking
+mlruns/
+.mlflow/
+mlartifacts/
+
+# SQLite databases (local dev state / tracking)
+*.db
+*.sqlite3
+!tests/fixtures/*.db
+
+# Model artifacts (large trained weights)
+artifacts/models/*.pkl
+artifacts/models/*.joblib
+artifacts/models/*.txt
+!artifacts/**/.gitkeep
+
+# Testing and coverage
+.tox/
+.nox/
+.coverage
+.coverage.*
+.cache
+nosetests.xml
+coverage.xml
+*.cover
+*.py,cover
+.hypothesis/
+.pytest_cache/
+cover/
+
+# Jupyter Notebook checkpoints
+.ipynb_checkpoints
+*/.ipynb_checkpoints/*
+
+# IDE and OS files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# Docker logs
+*.log
