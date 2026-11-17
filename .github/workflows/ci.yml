@@ -1,0 +1,39 @@
+name: ChronosCast CI
+
+on:
+  push:
+    branches: [ main, master ]
+  pull_request:
+    branches: [ main, master ]
+
+jobs:
+  test-and-lint:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python 3.12
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install uv package manager
+        run: curl -LsSf https://astral.sh/uv/install.sh | sh
+
+      - name: Install dependencies
+        run: |
+          uv pip install --system -e ".[dev]"
+
+      - name: Lint and format check with Ruff
+        run: |
+          ruff check src/ api/ app/ tests/ scripts/
+          ruff format --check src/ api/ app/ tests/ scripts/
+
+      - name: Execute pytest test suite
+        run: |
+          pytest tests/ -v --cov=chronoscast --cov-report=term-missing
+
+      - name: Validate Streamlit and FastAPI compilability
+        run: |
+          python -m py_compile api/main.py app/Home.py
